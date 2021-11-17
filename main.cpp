@@ -1,12 +1,12 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdio.h>
-#include <string.h>
+
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <sys/types.h>
 
 int main() {
     char string[1000] = "Hello! We are learning about strto jhgj jhjh gfyf gfhg ### \n 1 2$3 4 ### \n sdf $s dsfasdf $s";
@@ -25,7 +25,7 @@ int main() {
     int fd;
 
     // FIFO file path
-    char * pipeFileDecoder = "/home/soroush/CLionProjects/ospr1/pipeFileDecoder";
+    char * pipeFileDecoder = "/home/soroush/CLionProjects/os_project/pipeFileDecoder";
 
     // Creating the named file(FIFO)
     // mkfifo(<pathname>, <permission>)
@@ -44,14 +44,42 @@ int main() {
     write(fd, strs[0], strlen(strs[0])+1);
     close(fd);
     // Open FIFO for Read only
-    fd = open(pipeFileDecoder, O_NONBLOCK);
+    //fd = open(pipeFileDecoder, O_NONBLOCK);
 
     // Read from FIFO
-    char arr1[500];
-    read(fd, arr1, sizeof(strs[0]));
+//    char arr1[500];
+//    read(fd, arr1, sizeof(strs[0])+1);
+//
+//    // Print the read message
+//    printf("User2: %s\n", arr1);
+//    close(fd);
 
-    // Print the read message
-    printf("User2: %s\n", arr1);
-    close(fd);
+    char *my_args[5];
+    pid_t pid;
+
+    my_args[0] = "child.exe";
+    my_args[1] = "arg1";
+    my_args[2] = "arg2";
+    my_args[3] = NULL;
+
+    puts ("fork()ing");
+
+    switch ((pid = fork()))
+    {
+        case -1:
+            /* Fork() has failed */
+            perror ("fork");
+            break;
+        case 0:
+            /* This is processed by the child */
+            execv ("child.exe", my_args);
+            puts("Uh oh! If this prints, execv() must have failed");
+            exit(EXIT_FAILURE);
+            break;
+        default:
+            /* This is processed by the parent */
+            puts ("This is a message from the parent");
+            break;
+    }
     return 0;
 }
