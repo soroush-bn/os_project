@@ -10,7 +10,15 @@
 int decoder(int argc,char *argv[]) {
     char message[100], ch;
     int i, key;
-    strcpy(message,"salam bar shoma ");
+    int fifo=0;
+    if ((fifo = open(argv[0], O_RDONLY)) < 0) {
+        printf("cannot open pipeDecoder\n" );
+        return -1 ;
+    }
+    char buf[500] = {0};
+    read(fifo, buf, 500);
+    close(fifo);
+    strcpy(message,buf);
     key = 3;
     for (i = 0; message[i] != '\0'; ++i) {
         ch = message[i];
@@ -36,7 +44,10 @@ int decoder(int argc,char *argv[]) {
 
     // Creating the named file(FIFO)
     // mkfifo(<pathname>, <permission>)
-    mkfifo(decoderToFinder, 0666);
+    if (mkfifo(decoderToFinder, S_IRUSR | S_IWUSR) < 0) {
+        printf("decoder proccess :Can not create decodertofinder fifo\n");
+
+    }
 
     //sending first part to decoder named pipe
     // Open FIFO for write only
@@ -50,5 +61,6 @@ int decoder(int argc,char *argv[]) {
     // and close it
     write(fd, message, strlen(message)+1);
     close(fd);
+    printf("decoder procces : msg wrote in decodertofinder \n");
     return 0;
 }
